@@ -1,0 +1,17 @@
+services:
+  data_recorder:
+    container_name: data_recorder
+    image: data_recorder:latest
+    build:
+      context: docker
+      dockerfile: dockerfile
+      args:
+        - http_tmp=$http_proxy
+        - https_tmp=$https_proxy
+    env_file:
+      - .env
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    command: tail -f /dev/null
+

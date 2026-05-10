@@ -1,0 +1,7 @@
+*.jsonl
+*.zip
+*.json
+*.log
+*.txt
+
+__pycache__
