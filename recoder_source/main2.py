@@ -52,6 +52,10 @@ def get_depth_diff_file_path(ts):
     return os.path.join(OUTPUT_DIR, f"depth_diff_{unix_time_to_date_str(ts)}.jsonl")
 
 
+def get_initial_orderbook_file_path(ts):
+    return os.path.join(OUTPUT_DIR, f"initial_orderbook_{unix_time_to_date_str(ts)}.jsonl")
+
+
 def get_final_orderbook_file_path(ts):
     return os.path.join(OUTPUT_DIR, f"final_orderbook_{unix_time_to_date_str(ts)}.jsonl")
 
@@ -71,6 +75,14 @@ def append_diff_event(event: dict):
     append_line(
         get_depth_diff_file_path(event["timestamp"]),
         json.dumps(event, ensure_ascii=False),
+    )
+
+
+def append_initial_orderbook(book: dict):
+    ts = book.get("lastUpdateTime", current_unix_time())
+    append_line(
+        get_initial_orderbook_file_path(ts),
+        json.dumps(book, ensure_ascii=False),
     )
 
 
@@ -212,6 +224,7 @@ async def maintain_local_order_book_once(symbol="BTCUSDT", run_deadline=None, sn
 
             # snapshot
             book = fetch_snapshot(symbol, snapshot_limit, state=state)
+            append_initial_orderbook(book)
             last_id = book["lastUpdateId"]
 
             await asyncio.sleep(0.1)
@@ -440,6 +453,7 @@ book = asyncio.run(main())
 append_final_orderbook(book)
 
 print("保存完了:")
+print(" - initial_orderbook_YYYY-MM-DD.jsonl（初期板を日付別保存）")
 print(" - depth_diff_YYYY-MM-DD.jsonl（差分を日付別保存）")
 print(" - final_orderbook_YYYY-MM-DD.jsonl（最終板を日付別保存）")
 print(" - main2_log_YYYY-MM-DD.txt（ログを日付別保存）")
